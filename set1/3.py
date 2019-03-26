@@ -7,4 +7,6 @@ def tryKey(key):
     return (bytes([x^y for (x,y) in zip(unhexlify(cipher),key)]))
 
 for i in range(2**8):
-    print(tryKey(i))
+    text = tryKey(i)
+    #if text.strip().isalpha():
+    print(str(tryKey(i)))
