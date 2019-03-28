@@ -10,7 +10,7 @@ def tryKey(cipher, key):
         print(plain)
 
 
-ciphers = open("4.txt", "r")
-for cipher in ciphers.readlines():
-    for i in range(2**8):
-        tryKey(cipher.strip(), i)
+with open("4.txt", "r") as ciphers:
+    for cipher in ciphers.readlines():
+        for i in range(2**8):
+            tryKey(cipher.strip(), i)
