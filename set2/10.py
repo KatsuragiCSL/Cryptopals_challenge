@@ -27,13 +27,19 @@ def padding(block, length):
 def encryptAES(plain, key, iv):
     n_blocks = (len(plain) // len(key)) + 1
     blocks = [plain[i*len(key):(i+1)*len(key)] for i in range(n_blocks)]
+
     #padding last block
     blocks[-1] = padding(block[-1], len(key))
 
     #initialize ciphertext blocks
     ciphertext_blocks = [iv]
     ciphertext = b''
+
     for i in range(n_blocks):
         c = encryptAESblock(XOR(blocks[i], ciphertext_blocks[i]), key)
         ciphertext += c
         ciphertext.append(c)
+
+    return ciphertext
+
+def decryptAES(ciphertext, key, iv):
