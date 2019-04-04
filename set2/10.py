@@ -61,7 +61,7 @@ def decryptAES(ciphertext, key, iv):
         p = XOR(blocks_to_be_XOR[i], XOR_list[i])
         plain += p
 
-    return plain
+    return smashPadding(plain, 16)
 
 #eliminate padding in decrypted message
 def smashPadding(b, block_length):
@@ -78,5 +78,4 @@ if __name__ == '__main__':
         key = b'YELLOW SUBMARINE'
         iv = bytes(chr(0)*16, 'utf-8')
         msg_d = decryptAES(msg, key, iv)
-        msg_d = smashPadding(msg_d, 16)
         print(msg_d)
