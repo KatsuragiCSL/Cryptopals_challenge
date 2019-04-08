@@ -2,7 +2,7 @@ from binascii import unhexlify
 
 def checkRepeatedBlock(cipher, keysize = 16):
     if len(cipher) % keysize != 0:
-        pass
+        n = len(cipher) // keysize
     else:
         n = len(cipher) // keysize
 
