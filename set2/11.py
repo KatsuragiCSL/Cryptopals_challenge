@@ -75,6 +75,6 @@ def checkRepeatedBlock(cipher, keysize = 16):
         return 2
 
 if __name__ == '__main__':
-    msg = encryption_oracle(urandom(100))
+    msg = encryption_oracle(bytes("A"*100, 'utf-8'))
     print(mode)
     print(checkRepeatedBlock(msg))
