@@ -52,6 +52,10 @@ def detectblocksize():
             return i
 
 def guessUnknown(known, keysize):
+    k = len(known)
+    #number of A's to leave one byte to guess
+    p = keysize - (k % keysize) - 1
+    plain = bytes("A"*p, 'utf-8')
 
 
 if __name__ == '__main__':
