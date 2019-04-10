@@ -51,10 +51,13 @@ def detectblocksize():
         if msg_pre[:i] == msg_cur[:i]:
             return i
 
-def guessUnknown()
+def guessUnknown(known, keysize):
+
 
 if __name__ == '__main__':
     keysize = detectblocksize()
     isECB = checkRepeatedBlock(AES_128_ECB(bytes("A"*100, 'utf-8'), key))
+    l_unknown = len(AES_128_ECB(bytes("", 'utf-8'), key))
     if isECB:
-        guessUnknown()
+        for r in range(l_unknown):
+            guessUnknown(known, keysize)
