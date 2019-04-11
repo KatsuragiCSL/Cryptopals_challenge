@@ -51,6 +51,17 @@ def detectblocksize():
         if msg_pre[:i] == msg_cur[:i]:
             return i
 
+def getUnknownLength(keysize):
+    #length of 'unknown' is not simply length of encrypting empty strength! That would give a number larger than the actual length becuz of Padding is attached!
+
+    compare1 = len(AES_128_ECB(bytes("", 'utf-8'), key))
+    for i in range(1, keysize):
+        compare2 = len(AES_128_ECB(bytes("T"*i, 'utf-8'), key))
+        #when filled up a full block and open a new block
+        if compare2 != compare1:
+            return (compare1 - i - 1)
+    return compare1
+
 def guessUnknown(known, keysize):
     k = len(known)
     #number of A's to leave one byte to guess
@@ -66,11 +77,10 @@ def guessUnknown(known, keysize):
 if __name__ == '__main__':
     keysize = detectblocksize()
     isECB = checkRepeatedBlock(AES_128_ECB(bytes("A"*100, 'utf-8'), key))
-    l_unknown = len(AES_128_ECB(bytes("", 'utf-8'), key))
+    l_unknown = getUnknownLength(keysize)
     if isECB:
         known = b''
         for r in range(l_unknown):
             new_known = guessUnknown(known, keysize)
             known = known + new_known
-            print(known)
         print(known.decode())
