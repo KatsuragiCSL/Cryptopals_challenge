@@ -54,14 +54,23 @@ def detectblocksize():
 def guessUnknown(known, keysize):
     k = len(known)
     #number of A's to leave one byte to guess
-    p = keysize - (k % keysize) - 1
+    p = keysize - (k % keysize) -1
     plain = bytes("A"*p, 'utf-8')
-
+    block = k // keysize
+    for i in range(256):
+        test = AES_128_ECB(plain + known + bytes([i]), key)[block*keysize:(block+1)*keysize]
+        if AES_128_ECB(plain, key)[block*keysize:(block+1)*keysize] == test:
+            #bytes(5) returns five \x00. It faked me. LOL
+            return bytes([i])
 
 if __name__ == '__main__':
     keysize = detectblocksize()
     isECB = checkRepeatedBlock(AES_128_ECB(bytes("A"*100, 'utf-8'), key))
     l_unknown = len(AES_128_ECB(bytes("", 'utf-8'), key))
     if isECB:
+        known = b''
         for r in range(l_unknown):
-            guessUnknown(known, keysize)
+            new_known = guessUnknown(known, keysize)
+            known = known + new_known
+            print(known)
+        print(known.decode())
