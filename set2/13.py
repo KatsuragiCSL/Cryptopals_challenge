@@ -46,7 +46,6 @@ def smashPadding(b, block_length):
     return b
 
 def decrypt_profile(profile):
-    global aes_key
     cipher = Cipher(algorithms.AES(aes_key), modes.ECB(), backend=backend)
     decryptor = cipher.decryptor()
     msg = decryptor.update(profile) + decryptor.finalize()
