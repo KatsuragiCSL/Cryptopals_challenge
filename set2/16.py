@@ -52,6 +52,7 @@ def check_admin(s):
 
 def attack():
     #CBC decryption XOR previos block of ciphertext after AES decipher
+    #So decrypt(block1 ^ a || block2) = something || (decrypt(block2) ^ a)
     #cyphertext under control starts at third block, so flip bits of second one
     c1 = AES_128_CBC("A"*16)
     c2 = XOR(b'A'*16, b';admin=true;\x04\x04\x04\x04')
