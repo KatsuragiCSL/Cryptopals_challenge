@@ -47,7 +47,26 @@ def AES_128_CBC_decrypt(ctxt):
     oracle = checkPadding(msg, 16)
     return oracle
 
+def XOR(x, y):
+    return bytes([a^b for (a,b) in zip(x, y)])
+
 if __name__ == '__main__':
-    plain = plains[randint(1, 10)]
+    plain = plains[randint(0, 9)]
     ctxt = AES_128_CBC_encrypt(plain)
-    print(AES_128_CBC_decrypt(ctxt))
+    print("plaintext:")
+    print(plain)
+    print("cyphertext:")
+    print(ctxt)
+    #padding length by bits flipping
+    for i in range(1, 16):
+        test = XOR(ctxt, (len(ctxt) - i - 16)*b'\x00' + b'\xff' + (i-1 + 16)*b'\x00')
+        if AES_128_CBC_decrypt(test):
+            p_len = i
+            break
+    #if no padding
+    try:
+        p_len
+    except NameError:
+        p_len = 0
+
+    
