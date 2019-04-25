@@ -40,7 +40,7 @@ def AES_128_CBC_encrypt(plain):
     encryptor = cipher.encryptor()
     return encryptor.update(plain) + encryptor.finalize()
 
-def AES_128_CBC_decrypt(ctxt):
+def AES_128_CBC_decrypt(ctxt, iv):
     cipher = Cipher(algorithms.AES(aes_key), modes.CBC(iv), backend=backend)
     decryptor = cipher.decryptor()
     msg = decryptor.update(ctxt) + decryptor.finalize()
@@ -49,6 +49,20 @@ def AES_128_CBC_decrypt(ctxt):
 
 def XOR(x, y):
     return bytes([a^b for (a,b) in zip(x, y)])
+
+def guess_one_byte(ctxt, known):
+    tail = len(known) // 16
+    #want to make the padding become 'tail + 1' times of 'tail + 1'
+    next_pad = bytes(chr(len(known)+1), 'utf-8')
+    idx = - (len(known) % 16) - 1
+    idx_change = idx - 16
+    target = ctxt[:(len(ctxt)-tail*16)]    #[:-tail*16] fails at tail = 0 
+    for i in range(256):
+        pad = bytes([i]) + XOR(known, next_pad*len(known))
+        test = target[:idx_change] + XOR(pad, target[idx_change:-16]) + target[-16:]
+        if AES_128_CBC_decrypt(test, iv):
+            return XOR(next_pad, bytes([i]))
+
 
 if __name__ == '__main__':
     plain = plains[randint(0, 9)]
@@ -60,8 +74,8 @@ if __name__ == '__main__':
     #padding length by bits flipping
     for i in range(1, 16):
         test = XOR(ctxt, (len(ctxt) - i - 16)*b'\x00' + b'\xff' + (i-1 + 16)*b'\x00')
-        if AES_128_CBC_decrypt(test):
-            p_len = i
+        if AES_128_CBC_decrypt(test,iv):
+            p_len = i - 1
             break
     #if no padding
     try:
@@ -69,4 +83,9 @@ if __name__ == '__main__':
     except NameError:
         p_len = 0
 
-    
+    print(p_len)
+    known = bytes(chr(p_len), 'utf-8')*p_len
+    for i in range(len(ctxt)):
+        new_known = guess_one_byte(ctxt, known)
+        known = new_known + known
+        print(known)
