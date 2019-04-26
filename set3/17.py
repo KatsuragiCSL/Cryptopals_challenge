@@ -2,6 +2,7 @@ from random import randint
 from os import urandom
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
+from base64 import b64decode
 backend = default_backend()
 
 plains = '''MDAwMDAwTm93IHRoYXQgdGhlIHBhcnR5IGlzIGp1bXBpbmc=
@@ -27,7 +28,7 @@ def padding(block, length):
         return (block + bytes(chr(n)*n, 'utf-8'))
 
 def checkPadding(b, block_length):
-    for i in range(1, block_length):
+    for i in range(1, block_length + 1):
         if (b[-i:] == bytes(chr(i)*i, 'utf-8')):
             return True
     return False
@@ -51,18 +52,26 @@ def XOR(x, y):
     return bytes([a^b for (a,b) in zip(x, y)])
 
 def guess_one_byte(ctxt, known):
-    tail = len(known) // 16
+    tail = (len(known)) // 16
+    known = known[:len(known) - tail*16]    #[:-tail*16] fails at tail = 0
     #want to make the padding become 'tail + 1' times of 'tail + 1'
     next_pad = bytes(chr(len(known)+1), 'utf-8')
-    idx = - (len(known) % 16) - 1
+    idx = -len(known) - 1
     idx_change = idx - 16
     target = ctxt[:(len(ctxt)-tail*16)]    #[:-tail*16] fails at tail = 0 
-    for i in range(256):
-        pad = bytes([i]) + XOR(known, next_pad*len(known))
-        test = target[:idx_change] + XOR(pad, target[idx_change:-16]) + target[-16:]
-        if AES_128_CBC_decrypt(test, iv):
-            return XOR(next_pad, bytes([i]))
-
+    if len(target) > 16:
+        for i in range(256):
+            pad = bytes([i]) + XOR(known, next_pad*len(known))
+            test = target[:idx_change] + XOR(pad, target[idx_change:-16]) + target[-16:]
+            if AES_128_CBC_decrypt(test, iv):
+                return XOR(next_pad, bytes([i]))
+    #first block. need to manipulate iv
+    else:
+        for i in range(256):
+            pad = bytes([i]) + XOR(known, next_pad*len(known))
+            iv_changed = iv[:idx] + XOR(pad, iv[idx:])
+            if AES_128_CBC_decrypt(target, iv_changed):
+                return XOR(next_pad, bytes([i]))
 
 if __name__ == '__main__':
     plain = plains[randint(0, 9)]
@@ -85,7 +94,8 @@ if __name__ == '__main__':
 
     print(p_len)
     known = bytes(chr(p_len), 'utf-8')*p_len
-    for i in range(len(ctxt)):
+    for i in range(len(ctxt) - p_len):
         new_known = guess_one_byte(ctxt, known)
         known = new_known + known
-        print(known)
+
+    print(b64decode(known))
