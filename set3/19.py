@@ -48,6 +48,7 @@ VHJhbnNmb3JtZWQgdXR0ZXJseTo=
 QSB0ZXJyaWJsZSBiZWF1dHkgaXMgYm9ybi4='''
 
 secrets = secrets.split('\n')
+secrets = [b64decode(secret) for secret in secrets]
 
 nonce = 0
 
@@ -76,7 +77,7 @@ def AES_128_CTR_decrypt(ctxt, key, nonce):
     return XOR(ctxt, key_stream)
 
 ctxts = [AES_128_CTR_decrypt(secret, key, nonce) for secret in secrets]
-asc = list(range(97, 122)) + list(range(65, 91)) + [32] + [33] + [39] + [44] + [46] +[63]
+asc = list(range(97, 123)) + list(range(65, 91)) + [32]
 asc = [bytes([x]) for x in asc]
 
 def guess_one_position(p):
